@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Admin Dashboard — Cyber Incident MIS</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet"/>
+
+<style>
+body{background:#0f172a;color:#e2e8f0;font-family:'Segoe UI',sans-serif}
+.navbar{background:#1e293b;border-bottom:1px solid #334155;padding:12px 24px}
+.navbar-brand{color:#f1f5f9!important;font-weight:700}
+.btn-logout{background:#334155;border:none;color:#94a3b8;font-size:.8rem;padding:6px 14px;border-radius:6px}
+.btn-logout:hover{background:#475569;color:#f1f5f9}
+.page-hdr{background:#1e293b;border-bottom:1px solid #334155;padding:18px 24px}
+.page-hdr h4{color:#f1f5f9;font-weight:700;margin:0;font-size:1.1rem}
+.page-hdr p{color:#64748b;margin:0;font-size:.83rem}
+.tab-bar{background:#1e293b;border-bottom:1px solid #334155;padding:0 24px}
+.tab-bar .nav-link{color:#64748b;border:none;border-bottom:3px solid transparent;padding:12px 18px;font-size:.86rem;font-weight:500;border-radius:0}
+.tab-bar .nav-link.active{color:#ef4444;border-bottom-color:#ef4444;background:transparent}
+.tab-bar .nav-link:hover:not(.active){color:#94a3b8;background:transparent}
+.stat-card{background:#1e293b;border:1px solid #334155;border-radius:10px;padding:16px 20px}
+.stat-card .num{font-size:1.8rem;font-weight:800;color:#f1f5f9}
+.stat-card .lbl{color:#64748b;font-size:.76rem}
+.card-dark{background:#1e293b;border:1px solid #334155;border-radius:12px;overflow:hidden;margin-bottom:16px}
+.card-hdr{background:#253347;border-bottom:1px solid #334155;padding:14px 20px}
+.card-hdr h6{color:#f1f5f9;font-weight:700;margin:0;font-size:.92rem}
+table{color:#cbd5e1}
+thead th{background:#253347;color:#94a3b8;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;border-color:#334155;font-weight:600}
+tbody td{border-color:#2d3f55;font-size:.82rem;vertical-align:middle}
+tbody tr:hover{background:#253347}
+.inc-id{font-family:monospace;color:#60a5fa;font-weight:700}
+.b-rep{background:rgba(148,163,184,.15);color:#94a3b8;border:1px solid #475569}
+.b-inv{background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3)}
+.b-res{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.3)}
+.b-cls{background:rgba(99,102,241,.15);color:#a5b4fc;border:1px solid rgba(99,102,241,.3)}
+.b-low{background:rgba(148,163,184,.15);color:#94a3b8}
+.b-med{background:rgba(251,191,36,.15);color:#fbbf24}
+.b-hgh{background:rgba(249,115,22,.15);color:#fb923c}
+.b-crt{background:rgba(239,68,68,.15);color:#f87171}
+.form-label{color:#cbd5e1;font-size:.8rem;font-weight:500}
+.form-control,.form-select{background:#0f172a;border:1px solid #334155;color:#f1f5f9;border-radius:8px;font-size:.82rem}
+.form-control:focus,.form-select:focus{background:#0f172a;border-color:#ef4444;color:#f1f5f9;box-shadow:0 0 0 3px rgba(239,68,68,.15)}
+.form-control option,.form-select option{background:#1e293b}
+.action-row{display:none;background:#0a1628}
+.action-row td{padding:14px 20px!important}
+.btn-sm-act{font-size:.74rem;padding:4px 11px;border-radius:6px;border:none;cursor:pointer;font-weight:500}
+.btn-cls-act{background:rgba(168,85,247,.2);color:#c084fc}
+.btn-cls-act:hover{background:rgba(168,85,247,.35);color:#d8b4fe}
+.btn-asgn-act{background:rgba(59,130,246,.2);color:#60a5fa}
+.btn-asgn-act:hover{background:rgba(59,130,246,.35);color:#93c5fd}
+.btn-close-act{background:rgba(99,102,241,.2);color:#a5b4fc}
+.btn-close-act:hover{background:rgba(99,102,241,.35);color:#c7d2fe}
+.btn-save-classify{background:#7c3aed;border:none;color:white;padding:7px 16px;border-radius:8px;font-size:.82rem;font-weight:600}
+.btn-save-assign{background:#1d4ed8;border:none;color:white;padding:7px 16px;border-radius:8px;font-size:.82rem;font-weight:600}
+.btn-add-user{background:linear-gradient(135deg,#ef4444,#b91c1c);border:none;color:white;padding:9px 20px;border-radius:8px;font-weight:600;font-size:.85rem}
+.btn-deact{background:rgba(239,68,68,.15);color:#f87171;font-size:.74rem;padding:4px 11px;border-radius:6px;border:none;cursor:pointer}
+.btn-act{background:rgba(34,197,94,.15);color:#4ade80;font-size:.74rem;padding:4px 11px;border-radius:6px;border:none;cursor:pointer}
+.log-reporter{background:rgba(34,197,94,.08);border-left:3px solid #22c55e}
+.log-analyst{background:rgba(251,191,36,.08);border-left:3px solid #f59e0b}
+.log-admin{background:rgba(239,68,68,.08);border-left:3px solid #ef4444}
+.log-management{background:rgba(6,182,212,.08);border-left:3px solid #06b6d4}
+.role-badge-reporter{background:rgba(34,197,94,.15);color:#4ade80;font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:600}
+.role-badge-analyst{background:rgba(251,191,36,.15);color:#fbbf24;font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:600}
+.role-badge-admin{background:rgba(239,68,68,.15);color:#f87171;font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:600}
+.role-badge-management{background:rgba(6,182,212,.15);color:#67e8f9;font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:600}
+.action-chip{background:rgba(99,102,241,.15);color:#a5b4fc;font-size:.72rem;padding:2px 10px;border-radius:10px}
+.log-stat-card{background:#0f172a;border:1px solid #334155;border-radius:8px;padding:10px 14px;text-align:center}
+.log-stat-card .n{font-size:1.3rem;font-weight:800}
+.log-stat-card .l{font-size:.7rem;color:#64748b}
+</style>
+</head>
+
+<body>
+
+<nav class="navbar d-flex justify-content-between">
+  <span class="navbar-brand">
+    <i class="bi bi-shield-exclamation me-2"></i>Cyber Incident MIS
+  </span>
+
+  <div class="d-flex align-items-center gap-3">
+    <span style="color:#94a3b8;font-size:.85rem">
+      <i class="bi bi-person-circle me-1"></i>{{session.user_name}}
+      <span class="badge bg-danger ms-1" style="font-size:.62rem">Admin</span>
+    </span>
+    <a href="/logout" class="btn btn-logout">
+      <i class="bi bi-box-arrow-right me-1"></i>Logout
+    </a>
+  </div>
+</nav>
+
+<div class="page-hdr">
+  <h4><i class="bi bi-gear-fill me-2 text-danger"></i>Admin Dashboard</h4>
+  <p>Classify and assign incidents, manage user accounts, and monitor all system activity</p>
+</div>
+
+<div class="tab-bar">
+  <ul class="nav">
+    <li class="nav-item">
+      <a class="nav-link active" href="#" onclick="showTab('incidents',this)">
+        <i class="bi bi-exclamation-triangle me-1"></i>All Incidents
+        <span class="badge bg-danger ms-1" style="font-size:.6rem">{{incidents|length}}</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="#" onclick="showTab('users',this)">
+        <i class="bi bi-people me-1"></i>User Management
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="#" onclick="showTab('audit',this)">
+        <i class="bi bi-journal-text me-1"></i>Audit Log
+      </a>
+    </li>
+  </ul>
+</div>
+
+<div class="container-fluid px-4 py-4">
+
+  <!-- STATS -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="num text-danger">{{incidents|length}}</div>
+        <div class="lbl">Total Incidents</div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="num text-warning">{{incidents|selectattr('status','equalto','Reported')|list|length}}</div>
+        <div class="lbl">Awaiting Assignment</div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="num" style="color:#fb923c">{{incidents|selectattr('status','equalto','Under Investigation')|list|length}}</div>
+        <div class="lbl">Under Investigation</div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="num text-success">{{incidents|selectattr('status','equalto','Resolved')|list|length}}</div>
+        <div class="lbl">Resolved</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INCIDENTS TAB -->
+  <div id="tab-incidents">
+    <div class="card-dark">
+      <div class="card-hdr">
+        <h6><i class="bi bi-list-ul me-2 text-danger"></i>All Incidents — Classify & Assign</h6>
+      </div>
+
+      <div class="p-2">
+        <div class="table-responsive">
+          <table class="table table-borderless mb-0">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Severity</th>
+                <th>Reporter</th>
+                <th>Status</th>
+                <th>Assigned To</th>
+                <th>Priority</th>
+                <th>Impact</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+            {% for inc in incidents %}
+
+              <tr>
+                <td><span class="inc-id">{{inc.incident_id}}</span></td>
+                <td>{{inc.type}}</td>
+
+                <!-- FIXED: now displays inc.severity_category instead of inc.severity -->
+                <td>
+                  {% if inc.severity_category=='Critical' %}
+                    <span class="badge b-crt rounded-pill">Critical</span>
+                  {% elif inc.severity_category=='High' %}
+                    <span class="badge b-hgh rounded-pill">High</span>
+                  {% elif inc.severity_category=='Medium' %}
+                    <span class="badge b-med rounded-pill">Medium</span>
+                  {% elif inc.severity_category=='Low' %}
+                    <span class="badge b-low rounded-pill">Low</span>
+                  {% else %}
+                    <span class="badge b-low rounded-pill">Not Set</span>
+                  {% endif %}
+                </td>
+
+                <td style="color:#94a3b8">{{inc.reporter_name}}</td>
+
+                <td>
+                  {% if inc.status=='Reported' %}
+                    <span class="badge b-rep rounded-pill">Reported</span>
+                  {% elif inc.status=='Under Investigation' %}
+                    <span class="badge b-inv rounded-pill">Under Investigation</span>
+                  {% elif inc.status=='Resolved' %}
+                    <span class="badge b-res rounded-pill">Resolved</span>
+                  {% else %}
+                    <span class="badge b-cls rounded-pill">Closed</span>
+                  {% endif %}
+                </td>
+
+                <td style="color:#94a3b8;font-size:.8rem">{{inc.assigned_to_name or '—'}}</td>
+                <td style="color:#c084fc;font-size:.78rem">{{inc.priority or '—'}}</td>
+                <td style="color:#67e8f9;font-size:.78rem">{{inc.impact_level or '—'}}</td>
+
+                <td>
+                  <div class="d-flex gap-1 flex-wrap">
+                    {% if inc.status != 'Closed' %}
+                      <button class="btn-sm-act btn-cls-act" onclick="toggleRow('c-{{inc.id}}')">
+                        <i class="bi bi-tag me-1"></i>Classify
+                      </button>
+
+                      <button class="btn-sm-act btn-asgn-act" onclick="toggleRow('a-{{inc.id}}')">
+                        <i class="bi bi-person-check me-1"></i>Assign
+                      </button>
+
+                      {% if inc.status == 'Resolved' %}
+                        <form method="POST" action="/admin/close/{{inc.id}}" style="display:inline">
+                          <button type="submit" class="btn-sm-act btn-close-act">
+                            <i class="bi bi-check2-all me-1"></i>Close
+                          </button>
+                        </form>
+                      {% endif %}
+
+                    {% else %}
+                      <span style="color:#475569;font-size:.75rem">Completed</span>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+
+              <!-- CLASSIFY ROW -->
+              <tr class="action-row" id="c-{{inc.id}}">
+                <td colspan="9">
+                  <form method="POST" action="/admin/classify/{{inc.id}}" class="row g-2 align-items-end">
+
+                    <div class="col-auto">
+                      <label class="form-label" style="font-size:.75rem">Severity Category</label>
+                      <select name="severity_category" class="form-select form-select-sm" style="min-width:130px">
+                        <option value="Low" {{'selected' if inc.severity_category=='Low' else ''}}>Low</option>
+                        <option value="Medium" {{'selected' if inc.severity_category=='Medium' else ''}}>Medium</option>
+                        <option value="High" {{'selected' if inc.severity_category=='High' else ''}}>High</option>
+                        <option value="Critical" {{'selected' if inc.severity_category=='Critical' else ''}}>Critical</option>
+                      </select>
+                    </div>
+
+                    <div class="col-auto">
+                      <label class="form-label" style="font-size:.75rem">Impact Level</label>
+                      <select name="impact_level" class="form-select form-select-sm" style="min-width:130px">
+                        <option value="Low" {{'selected' if inc.impact_level=='Low' else ''}}>Low</option>
+                        <option value="Moderate" {{'selected' if inc.impact_level=='Moderate' else ''}}>Moderate</option>
+                        <option value="High" {{'selected' if inc.impact_level=='High' else ''}}>High</option>
+                        <option value="Critical" {{'selected' if inc.impact_level=='Critical' else ''}}>Critical</option>
+                      </select>
+                    </div>
+
+                    <div class="col-auto">
+                      <label class="form-label" style="font-size:.75rem">Priority</label>
+                      <select name="priority" class="form-select form-select-sm" style="min-width:150px">
+                        <option value="P1 - Critical" {{'selected' if inc.priority=='P1 - Critical' else ''}}>P1 - Critical</option>
+                        <option value="P2 - High" {{'selected' if inc.priority=='P2 - High' else ''}}>P2 - High</option>
+                        <option value="P3 - Medium" {{'selected' if inc.priority=='P3 - Medium' else ''}}>P3 - Medium</option>
+                        <option value="P4 - Low" {{'selected' if inc.priority=='P4 - Low' else ''}}>P4 - Low</option>
+                      </select>
+                    </div>
+
+                    <div class="col-auto">
+                      <button type="submit" class="btn-save-classify">
+                        <i class="bi bi-check me-1"></i>Save Classification
+                      </button>
+                    </div>
+
+                  </form>
+                </td>
+              </tr>
+
+              <!-- ASSIGN ROW -->
+              <tr class="action-row" id="a-{{inc.id}}">
+                <td colspan="9">
+                  <form method="POST" action="/admin/assign/{{inc.id}}" class="d-flex gap-2 align-items-end flex-wrap">
+
+                    <div>
+                      <label class="form-label" style="font-size:.75rem">Assign to Analyst</label>
+                      <select name="analyst_id" class="form-select form-select-sm" style="min-width:200px">
+                        {% for analyst in analysts %}
+                          <option value="{{analyst.id}}" {{'selected' if inc.assigned_to_name==analyst.name else ''}}>
+                            {{analyst.name}}
+                          </option>
+                        {% endfor %}
+                      </select>
+                    </div>
+
+                    <button type="submit" class="btn-save-assign">
+                      <i class="bi bi-person-check me-1"></i>Confirm Assignment
+                    </button>
+
+                  </form>
+                </td>
+              </tr>
+
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- USERS TAB -->
+  <div id="tab-users" style="display:none">
+    <div class="card-dark mb-4">
+      <div class="card-hdr">
+        <h6><i class="bi bi-person-plus me-2 text-danger"></i>Add New User</h6>
+      </div>
+
+      <div class="p-4">
+        <form method="POST" action="/admin/add_user" class="row g-3">
+
+          <div class="col-12 col-md-2">
+            <label class="form-label">Full Name *</label>
+            <input type="text" name="name" class="form-control form-control-sm" required/>
+          </div>
+
+          <div class="col-12 col-md-3">
+            <label class="form-label">Email *</label>
+            <input type="email" name="email" class="form-control form-control-sm" required/>
+          </div>
+
+          <div class="col-12 col-md-2">
+            <label class="form-label">Password *</label>
+            <input type="password" name="password" class="form-control form-control-sm" required/>
+          </div>
+
+          <div class="col-6 col-md-1">
+            <label class="form-label">Role *</label>
+            <select name="role" class="form-select form-select-sm" required>
+              <option value="reporter">Reporter</option>
+              <option value="analyst">Analyst</option>
+              <option value="management">Management</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+
+          <div class="col-6 col-md-2">
+            <label class="form-label">Department</label>
+            <input type="text" name="department" class="form-control form-control-sm"/>
+          </div>
+
+          <div class="col-6 col-md-1">
+            <label class="form-label">Phone</label>
+            <input type="text" name="phone" class="form-control form-control-sm"/>
+          </div>
+
+          <div class="col-6 col-md-1 d-flex align-items-end">
+            <button type="submit" class="btn-add-user w-100">
+              <i class="bi bi-plus me-1"></i>Add
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+    <div class="card-dark">
+      <div class="card-hdr">
+        <h6><i class="bi bi-people me-2 text-danger"></i>All System Users</h6>
+      </div>
+
+      <div class="p-2">
+        <div class="table-responsive">
+          <table class="table table-borderless mb-0">
+
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Department</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+            {% for user in users %}
+              <tr>
+                <td style="font-weight:600;color:#f1f5f9">{{user.name}}</td>
+                <td style="color:#94a3b8;font-size:.8rem">{{user.email}}</td>
+
+                <td>
+                  {% if user.role=='admin' %}
+                    <span class="badge bg-danger" style="font-size:.68rem">Admin</span>
+                  {% elif user.role=='analyst' %}
+                    <span class="badge bg-warning text-dark" style="font-size:.68rem">Analyst</span>
+                  {% elif user.role=='reporter' %}
+                    <span class="badge bg-success" style="font-size:.68rem">Reporter</span>
+                  {% else %}
+                    <span class="badge bg-info text-dark" style="font-size:.68rem">Management</span>
+                  {% endif %}
+                </td>
+
+                <td style="color:#94a3b8;font-size:.8rem">{{user.department or '—'}}</td>
+                <td style="color:#94a3b8;font-size:.8rem">{{user.phone or '—'}}</td>
+
+                <td>
+                  {% if user.is_active %}
+                    <span style="color:#4ade80;font-size:.82rem">
+                      <i class="bi bi-circle-fill me-1" style="font-size:.5rem"></i>Active
+                    </span>
+                  {% else %}
+                    <span style="color:#f87171;font-size:.82rem">
+                      <i class="bi bi-circle-fill me-1" style="font-size:.5rem"></i>Inactive
+                    </span>
+                  {% endif %}
+                </td>
+
+                <td style="color:#64748b;font-size:.78rem">{{user.created_at[:10]}}</td>
+
+                <td>
+                  {% if user.id != session.user_id %}
+                    <form method="POST" action="/admin/toggle_user/{{user.id}}" style="display:inline">
+                      <button type="submit" class="{{'btn-deact' if user.is_active else 'btn-act'}}">
+                        {% if user.is_active %}
+                          <i class="bi bi-person-x me-1"></i>Deactivate
+                        {% else %}
+                          <i class="bi bi-person-check me-1"></i>Activate
+                        {% endif %}
+                      </button>
+                    </form>
+                  {% else %}
+                    <span style="color:#475569;font-size:.75rem">Current</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUDIT LOG TAB -->
+  <div id="tab-audit" style="display:none">
+
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md">
+        <div class="log-stat-card">
+          <div class="n" style="color:#f1f5f9">{{log_stats.total}}</div>
+          <div class="l">Total Events</div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md">
+        <div class="log-stat-card">
+          <div class="n" style="color:#4ade80">{{log_stats.reporter}}</div>
+          <div class="l">Reporter Actions</div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md">
+        <div class="log-stat-card">
+          <div class="n" style="color:#fbbf24">{{log_stats.analyst}}</div>
+          <div class="l">Analyst Actions</div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md">
+        <div class="log-stat-card">
+          <div class="n" style="color:#f87171">{{log_stats.admin}}</div>
+          <div class="l">Admin Actions</div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md">
+        <div class="log-stat-card">
+          <div class="n" style="color:#67e8f9">{{log_stats.mgmt}}</div>
+          <div class="l">Management Views</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-dark">
+      <div class="card-hdr">
+        <h6>
+          <i class="bi bi-journal-text me-2 text-danger"></i>Complete System Audit Log
+          <small style="color:#64748b;font-weight:400">— colour coded by role</small>
+        </h6>
+      </div>
+
+      <div style="overflow-x:auto">
+        <table class="table table-borderless mb-0" style="min-width:700px">
+
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>User</th>
+              <th>Role</th>
+              <th>Action</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+
+          <tbody>
+          {% for log in logs %}
+            <tr class="log-{{log.user_role}}">
+              <td style="color:#64748b;font-size:.78rem;white-space:nowrap;padding-left:12px">{{log.timestamp}}</td>
+              <td style="color:#f1f5f9;font-size:.83rem;font-weight:500">{{log.user_name}}</td>
+
+              <td>
+                {% if log.user_role=='reporter' %}
+                  <span class="role-badge-reporter">Reporter</span>
+                {% elif log.user_role=='analyst' %}
+                  <span class="role-badge-analyst">Analyst</span>
+                {% elif log.user_role=='admin' %}
+                  <span class="role-badge-admin">Admin</span>
+                {% else %}
+                  <span class="role-badge-management">Management</span>
+                {% endif %}
+              </td>
+
+              <td><span class="action-chip">{{log.action}}</span></td>
+              <td style="color:#94a3b8;font-size:.8rem">{{log.details}}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function showTab(tab, el) {
+  ['incidents','users','audit'].forEach(t => {
+    document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+
+  document.querySelectorAll('.tab-bar .nav-link').forEach(l => {
+    l.classList.remove('active');
+  });
+
+  el.classList.add('active');
+}
+
+function toggleRow(id) {
+  const el = document.getElementById(id);
+  el.style.display = el.style.display === 'table-row' ? 'none' : 'table-row';
+}
+</script>
+
+</body>
+</html>

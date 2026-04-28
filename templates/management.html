@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Management Dashboard — Cyber Incident MIS</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body{background:#0f172a;color:#e2e8f0;font-family:'Segoe UI',sans-serif}
+.navbar{background:#1e293b;border-bottom:1px solid #334155;padding:12px 24px}
+.navbar-brand{color:#f1f5f9!important;font-weight:700}
+.btn-logout{background:#334155;border:none;color:#94a3b8;font-size:.8rem;padding:6px 14px;border-radius:6px}
+.btn-logout:hover{background:#475569;color:#f1f5f9}
+.page-hdr{background:#1e293b;border-bottom:1px solid #334155;padding:18px 24px}
+.page-hdr h4{color:#f1f5f9;font-weight:700;margin:0;font-size:1.1rem}
+.page-hdr p{color:#64748b;margin:0;font-size:.83rem}
+.stat-card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px 24px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.stat-card.blue::before{background:#3b82f6}.stat-card.orange::before{background:#f97316}
+.stat-card.green::before{background:#22c55e}.stat-card.red::before{background:#ef4444}
+.stat-card .num{font-size:2rem;font-weight:800;color:#f1f5f9}
+.stat-card .lbl{color:#64748b;font-size:.8rem;margin-top:2px}
+.stat-card .ico{position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:2.2rem;opacity:.08}
+.card-dark{background:#1e293b;border:1px solid #334155;border-radius:12px;overflow:hidden;margin-bottom:16px}
+.card-hdr{background:#253347;border-bottom:1px solid #334155;padding:14px 20px}
+.card-hdr h6{color:#f1f5f9;font-weight:700;margin:0;font-size:.92rem}
+.filter-bar{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px 20px;margin-bottom:20px}
+.filter-bar label{color:#94a3b8;font-size:.76rem;display:block;margin-bottom:4px}
+.form-select,.form-control{background:#0f172a;border:1px solid #334155;color:#f1f5f9;border-radius:8px;font-size:.83rem}
+.form-select:focus,.form-control:focus{background:#0f172a;border-color:#06b6d4;color:#f1f5f9;box-shadow:0 0 0 3px rgba(6,182,212,.15)}
+.form-select option{background:#1e293b}
+.btn-filter{background:linear-gradient(135deg,#06b6d4,#0891b2);border:none;color:white;padding:8px 18px;border-radius:8px;font-weight:600;font-size:.83rem}
+.btn-filter:hover{opacity:.9;color:white}
+.btn-clear{background:#334155;border:none;color:#94a3b8;padding:8px 14px;border-radius:8px;font-size:.83rem}
+.btn-clear:hover{background:#475569;color:#f1f5f9;text-decoration:none}
+table{color:#cbd5e1}
+thead th{background:#253347;color:#94a3b8;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;border-color:#334155;font-weight:600}
+tbody td{border-color:#2d3f55;font-size:.82rem;vertical-align:middle}
+tbody tr:hover{background:#1a2744;cursor:pointer}
+.inc-id{font-family:monospace;color:#60a5fa;font-weight:700}
+.b-rep{background:rgba(148,163,184,.15);color:#94a3b8;border:1px solid #475569}
+.b-inv{background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3)}
+.b-res{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.3)}
+.b-cls{background:rgba(99,102,241,.15);color:#a5b4fc;border:1px solid rgba(99,102,241,.3)}
+.b-low{background:rgba(148,163,184,.15);color:#94a3b8}
+.b-med{background:rgba(251,191,36,.15);color:#fbbf24}
+.b-hgh{background:rgba(249,115,22,.15);color:#fb923c}
+.b-crt{background:rgba(239,68,68,.15);color:#f87171}
+.chart-wrap{position:relative;height:220px}
+.readonly-notice{background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.2);border-radius:8px;padding:8px 14px;color:#67e8f9;font-size:.78rem;margin-bottom:16px}
+
+/* INCIDENT DETAIL MODAL / EXPAND */
+.detail-row{display:none;background:#0a1628}
+.detail-row td{padding:0!important}
+.detail-panel{padding:20px;border-top:2px solid #1e3a5f}
+.dp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+.dp-field{background:#1e293b;border:1px solid #334155;border-radius:8px;padding:10px 14px}
+.dp-field label{font-size:.68rem;color:#64748b;text-transform:uppercase;letter-spacing:.06em;font-weight:600;display:block;margin-bottom:4px}
+.dp-field span{font-size:.85rem;color:#cbd5e1;font-weight:500}
+.dp-section{margin-bottom:16px}
+.dp-section h6{font-size:.72rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;font-weight:700;border-bottom:1px solid #334155;padding-bottom:6px;margin-bottom:10px}
+.dp-text{background:#1e293b;border:1px solid #334155;border-radius:8px;padding:12px 14px;font-size:.85rem;color:#cbd5e1;line-height:1.6}
+.inv-box{background:#1a2744;border:1px solid #1e3a5f;border-radius:8px;padding:12px 14px}
+.inv-box label{font-size:.68rem;color:#60a5fa;text-transform:uppercase;letter-spacing:.06em;font-weight:700;display:block;margin-bottom:4px}
+.inv-box p{font-size:.84rem;color:#93c5fd;margin:0 0 10px;line-height:1.5}
+.inv-box p:last-child{margin:0}
+.expand-btn{background:none;border:none;color:#64748b;font-size:.75rem;padding:0;cursor:pointer}
+.expand-btn:hover{color:#94a3b8}
+</style></head>
+<body>
+<nav class="navbar d-flex justify-content-between">
+  <span class="navbar-brand"><i class="bi bi-shield-exclamation me-2"></i>Cyber Incident MIS</span>
+  <div class="d-flex align-items-center gap-3">
+    <span style="color:#94a3b8;font-size:.85rem"><i class="bi bi-person-circle me-1"></i>{{session.user_name}} <span class="badge bg-info text-dark ms-1" style="font-size:.62rem">Management</span></span>
+    <a href="/logout" class="btn btn-logout"><i class="bi bi-box-arrow-right me-1"></i>Logout</a>
+  </div>
+</nav>
+<div class="page-hdr">
+  <h4><i class="bi bi-bar-chart-line me-2 text-info"></i>Management Dashboard</h4>
+  <p>Analytical overview of all cyber incidents — read only access</p>
+</div>
+
+<div class="container-fluid px-4 py-4">
+  <div class="readonly-notice"><i class="bi bi-eye me-2"></i>Read-only access. Click any incident row to view full details including investigation reports.</div>
+
+  <!-- STAT CARDS -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3"><div class="stat-card blue"><div class="num">{{total}}</div><div class="lbl">Total Incidents</div><i class="bi bi-collection ico"></i></div></div>
+    <div class="col-6 col-md-3"><div class="stat-card orange"><div class="num">{{open_inc}}</div><div class="lbl">Open / Active</div><i class="bi bi-exclamation-triangle ico"></i></div></div>
+    <div class="col-6 col-md-3"><div class="stat-card green"><div class="num">{{resolved}}</div><div class="lbl">Resolved / Closed</div><i class="bi bi-check-circle ico"></i></div></div>
+    <div class="col-6 col-md-3"><div class="stat-card red"><div class="num">{{critical}}</div><div class="lbl">Critical Severity</div><i class="bi bi-shield-x ico"></i></div></div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="row g-4 mb-4">
+    <div class="col-12 col-md-3">
+      <div class="card-dark h-100">
+        <div class="card-hdr"><h6><i class="bi bi-pie-chart me-2 text-info"></i>By Type</h6></div>
+        <div class="p-3"><div class="chart-wrap"><canvas id="typeChart"></canvas></div></div>
+      </div>
+    </div>
+    <div class="col-12 col-md-3">
+      <div class="card-dark h-100">
+        <div class="card-hdr"><h6><i class="bi bi-bar-chart me-2 text-info"></i>By Severity</h6></div>
+        <div class="p-3"><div class="chart-wrap"><canvas id="sevChart"></canvas></div></div>
+      </div>
+    </div>
+    <div class="col-12 col-md-3">
+      <div class="card-dark h-100">
+        <div class="card-hdr"><h6><i class="bi bi-graph-up me-2 text-info"></i>Monthly Trend</h6></div>
+        <div class="p-3"><div class="chart-wrap"><canvas id="monthChart"></canvas></div></div>
+      </div>
+    </div>
+    <div class="col-12 col-md-3">
+      <div class="card-dark h-100">
+        <div class="card-hdr"><h6><i class="bi bi-pie-chart-fill me-2 text-info"></i>By Status</h6></div>
+        <div class="p-3"><div class="chart-wrap"><canvas id="statusChart"></canvas></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTER -->
+  <div class="filter-bar">
+    <form method="GET" action="/management" class="row g-2 align-items-end">
+      <div class="col-6 col-md-2"><label>Type</label>
+        <select name="type" class="form-select form-select-sm">
+          <option value="">All Types</option>
+          {% for t in ['Phishing','Malware','Ransomware','Unauthorized Access','Data Breach','DDoS Attack','Insider Threat','Social Engineering','Other'] %}
+          <option {{'selected' if filters.type==t else ''}}>{{t}}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-md-2"><label>Severity</label>
+        <select name="severity" class="form-select form-select-sm">
+          <option value="">All</option>
+          {% for s in ['Low','Medium','High','Critical'] %}
+          <option {{'selected' if filters.severity==s else ''}}>{{s}}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-md-2"><label>Status</label>
+        <select name="status" class="form-select form-select-sm">
+          <option value="">All</option>
+          {% for s in ['Reported','Under Investigation','Resolved','Closed'] %}
+          <option {{'selected' if filters.status==s else ''}}>{{s}}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-md-2"><label>From Date</label><input type="date" name="date_from" class="form-control form-control-sm" value="{{filters.date_from}}"/></div>
+      <div class="col-6 col-md-2"><label>To Date</label><input type="date" name="date_to" class="form-control form-control-sm" value="{{filters.date_to}}"/></div>
+      <div class="col-6 col-md-2 d-flex gap-2 align-items-end">
+        <button type="submit" class="btn-filter"><i class="bi bi-funnel me-1"></i>Filter</button>
+        <a href="/management" class="btn-clear">Clear</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- INCIDENTS TABLE — click row to expand full details -->
+  <div class="card-dark">
+    <div class="card-hdr d-flex justify-content-between align-items-center">
+      <h6><i class="bi bi-table me-2 text-info"></i>Incident Records <small style="color:#64748b;font-weight:400">— click any row for full details</small></h6>
+      <span class="badge" style="background:#334155;color:#94a3b8">{{incidents|length}} records</span>
+    </div>
+    <div class="p-2">
+      <div class="table-responsive">
+        <table class="table table-borderless mb-0">
+          <thead><tr><th></th><th>ID</th><th>Type</th><th>Severity</th><th>Status</th><th>Reporter</th><th>Dept</th><th>Assigned To</th><th>Priority</th><th>Occurred</th></tr></thead>
+          <tbody>
+          {% for inc in incidents %}
+          <tr onclick="toggleDetail('d-{{inc.id}}')" title="Click to view full details">
+            <td><button class="expand-btn" id="btn-{{inc.id}}"><i class="bi bi-chevron-right"></i></button></td>
+            <td><span class="inc-id">{{inc.incident_id}}</span></td>
+            <td>{{inc.type}}</td>
+            <td>{% if inc.severity=='Critical' %}<span class="badge b-crt rounded-pill">Critical</span>
+                {% elif inc.severity=='High' %}<span class="badge b-hgh rounded-pill">High</span>
+                {% elif inc.severity=='Medium' %}<span class="badge b-med rounded-pill">Medium</span>
+                {% else %}<span class="badge b-low rounded-pill">Low</span>{% endif %}</td>
+            <td>{% if inc.status=='Reported' %}<span class="badge b-rep rounded-pill">Reported</span>
+                {% elif inc.status=='Under Investigation' %}<span class="badge b-inv rounded-pill">Under Investigation</span>
+                {% elif inc.status=='Resolved' %}<span class="badge b-res rounded-pill">Resolved</span>
+                {% else %}<span class="badge b-cls rounded-pill">Closed</span>{% endif %}</td>
+            <td style="color:#94a3b8">{{inc.reporter_name}}</td>
+            <td style="color:#64748b;font-size:.78rem">{{inc.department or '—'}}</td>
+            <td style="color:#94a3b8">{{inc.assigned_to_name or '—'}}</td>
+            <td style="color:#c084fc;font-size:.78rem">{{inc.priority or '—'}}</td>
+            <td style="color:#64748b;font-size:.78rem">{{inc.occurred_at[:10]}}</td>
+          </tr>
+          <!-- FULL DETAIL ROW -->
+          <tr class="detail-row" id="d-{{inc.id}}">
+            <td colspan="10">
+              <div class="detail-panel">
+                <div class="dp-section">
+                  <h6>Incident Details</h6>
+                  <div class="dp-grid">
+                    <div class="dp-field"><label>Incident ID</label><span style="font-family:monospace;color:#60a5fa">{{inc.incident_id}}</span></div>
+                    <div class="dp-field"><label>Type</label><span>{{inc.type}}</span></div>
+                    <div class="dp-field"><label>Severity</label><span>{{inc.severity}}</span></div>
+                    <div class="dp-field"><label>Status</label><span>{{inc.status}}</span></div>
+                    <div class="dp-field"><label>Occurred At</label><span>{{inc.occurred_at}}</span></div>
+                    {% if inc.discovered_at %}<div class="dp-field"><label>Discovered At</label><span>{{inc.discovered_at}}</span></div>{% endif %}
+                    {% if inc.location %}<div class="dp-field"><label>Location</label><span>{{inc.location}}</span></div>{% endif %}
+                    {% if inc.no_of_users_affected %}<div class="dp-field"><label>Users Affected</label><span>{{inc.no_of_users_affected}}</span></div>{% endif %}
+                    <div class="dp-field"><label>Affected Resources</label><span>{{inc.affected_resources}}</span></div>
+                    {% if inc.affected_systems %}<div class="dp-field"><label>Affected Systems</label><span>{{inc.affected_systems}}</span></div>{% endif %}
+                    {% if inc.estimated_impact %}<div class="dp-field"><label>Estimated Impact</label><span>{{inc.estimated_impact}}</span></div>{% endif %}
+                    {% if inc.priority %}<div class="dp-field"><label>Priority</label><span style="color:#c084fc">{{inc.priority}}</span></div>{% endif %}
+                    {% if inc.impact_level %}<div class="dp-field"><label>Impact Level</label><span style="color:#67e8f9">{{inc.impact_level}}</span></div>{% endif %}
+                    <div class="dp-field"><label>Reported By</label><span>{{inc.reporter_name}} ({{inc.department or 'N/A'}})</span></div>
+                    <div class="dp-field"><label>Assigned To</label><span>{{inc.assigned_to_name or 'Not assigned'}}</span></div>
+                  </div>
+                </div>
+                <div class="dp-section">
+                  <h6>Incident Description</h6>
+                  <div class="dp-text">{{inc.description}}</div>
+                </div>
+                {% if inc.findings or inc.actions_taken or inc.resolution_details %}
+                <div class="dp-section">
+                  <h6>Investigation Report</h6>
+                  <div class="inv-box">
+                    {% if inc.findings %}<label>Findings</label><p>{{inc.findings}}</p>{% endif %}
+                    {% if inc.actions_taken %}<label>Actions Taken</label><p>{{inc.actions_taken}}</p>{% endif %}
+                    {% if inc.resolution_details %}<label>Resolution</label><p>{{inc.resolution_details}}</p>{% endif %}
+                  </div>
+                </div>
+                {% else %}
+                <div class="dp-section">
+                  <h6>Investigation Report</h6>
+                  <div class="dp-text" style="color:#475569">Investigation not yet filed for this incident.</div>
+                </div>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+Chart.defaults.color='#64748b';
+Chart.defaults.borderColor='#334155';
+
+// TYPE CHART
+const typeLabels=[{% for t in type_data %}"{{t.type}}",{% endfor %}];
+const typeCounts=[{% for t in type_data %}{{t.count}},{% endfor %}];
+new Chart(document.getElementById('typeChart'),{
+  type:'doughnut',
+  data:{labels:typeLabels,datasets:[{data:typeCounts,
+    backgroundColor:['#3b82f6','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#10b981','#f97316','#ec4899'],
+    borderWidth:2,borderColor:'#1e293b'}]},
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10},padding:8}}}}
+});
+
+// SEVERITY CHART — use parallel arrays to avoid Jinja/JS brace conflict
+const sevLabelsRaw=[{% for s in sev_data %}"{{s.severity}}",{% endfor %}];
+const sevCountsRaw=[{% for s in sev_data %}{{s.count}},{% endfor %}];
+const sevOrder=['Critical','High','Medium','Low'];
+const sevColorMap=['#ef4444','#f97316','#f59e0b','#94a3b8'];
+const sevDataOrdered=sevOrder.map(s=>{const i=sevLabelsRaw.indexOf(s);return i>=0?sevCountsRaw[i]:0;});
+new Chart(document.getElementById('sevChart'),{
+  type:'bar',
+  data:{labels:sevOrder,datasets:[{data:sevDataOrdered,
+    backgroundColor:sevColorMap,borderRadius:6,borderWidth:0}]},
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
+    scales:{x:{grid:{display:false}},y:{grid:{color:'#1e293b'},ticks:{stepSize:1}}}}
+});
+
+// MONTHLY TREND
+const mLabels=[{% for m in month_data %}"{{m.month}}",{% endfor %}];
+const mCounts=[{% for m in month_data %}{{m.count}},{% endfor %}];
+new Chart(document.getElementById('monthChart'),{
+  type:'line',
+  data:{labels:mLabels,datasets:[{data:mCounts,borderColor:'#06b6d4',
+    backgroundColor:'rgba(6,182,212,0.1)',fill:true,tension:0.4,
+    pointBackgroundColor:'#06b6d4',pointRadius:4,borderWidth:2}]},
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
+    scales:{x:{grid:{display:false}},y:{grid:{color:'#1e293b'},ticks:{stepSize:1}}}}
+});
+
+// STATUS CHART — map colours by index to avoid Jinja/JS brace conflict
+const stLabels=[{% for s in status_data %}"{{s.status}}",{% endfor %}];
+const stCounts=[{% for s in status_data %}{{s.count}},{% endfor %}];
+const stColorFor=(l)=>l==='Reported'?'#94a3b8':l==='Under Investigation'?'#f59e0b':l==='Resolved'?'#22c55e':'#6366f1';
+new Chart(document.getElementById('statusChart'),{
+  type:'doughnut',
+  data:{labels:stLabels,datasets:[{data:stCounts,
+    backgroundColor:stLabels.map(l=>stColorFor(l)),
+    borderWidth:2,borderColor:'#1e293b'}]},
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10},padding:8}}}}
+});
+
+// EXPAND ROW
+function toggleDetail(id) {
+  const row = document.getElementById(id);
+  const incId = id.replace('d-','');
+  const btn = document.getElementById('btn-'+incId);
+  const visible = row.style.display === 'table-row';
+  row.style.display = visible ? 'none' : 'table-row';
+  if (btn) btn.innerHTML = visible
+    ? '<i class="bi bi-chevron-right"></i>'
+    : '<i class="bi bi-chevron-down" style="color:#60a5fa"></i>';
+}
+</script>
+</body></html>
